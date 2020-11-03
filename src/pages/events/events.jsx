@@ -98,7 +98,7 @@ const Events = (props) => {
         <div className="row m-5">
           {data.map((item) => {
             return (
-              <div className="col-md-4" key={item._id}>
+              <div className="col-md-4 mb-2" key={item._id}>
                 <Card className={classes.root} style={{backgroundColor: '#f2f2f2'}}>
                   <CardContent>
                     <Typography

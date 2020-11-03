@@ -14,6 +14,8 @@ import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
 import { useHistory } from "react-router-dom";
 
+import QrReader from 'react-qr-reader'
+
 const Scan = (props) => {
     const history = useHistory();
   const [code, setCode] = useState("");
@@ -61,9 +63,16 @@ const Scan = (props) => {
     }
   };
 
-  useEffect(() => {}, []);
+  const handleScan = data => {
+    if (data) {
+     console.log(data);
+    }
+  }
+  const handleError = err => {
+    console.error(err)
+  }
 
-  console.log(ticket);
+  useEffect(() => {}, []);
 
   return (
     <>
@@ -146,6 +155,14 @@ const Scan = (props) => {
                 </Button>
               </CardActions>
             </Card>
+            <div>
+        {/* <QrReader
+          delay={300}
+          onError={handleError}
+          onScan={handleScan}
+          style={{ width: '100%' }}
+        /> */}
+      </div>
           </div>
         </div>
       </Layout>
