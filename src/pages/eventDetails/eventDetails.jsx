@@ -1,209 +1,160 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableFooter from '@material-ui/core/TableFooter';
-import TablePagination from '@material-ui/core/TablePagination';
-import TableRow from '@material-ui/core/TableRow';
-import Paper from '@material-ui/core/Paper';
-import IconButton from '@material-ui/core/IconButton';
-import FirstPageIcon from '@material-ui/icons/FirstPage';
-import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
-import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
-import LastPageIcon from '@material-ui/icons/LastPage';
-import TableHead from '@material-ui/core/TableHead';
+import React, { useState } from 'react';
 import Layout from '../../components/Layout';
+import axios from "axios";
+import BASE_API from "../../constants/uri";
+import swal from 'sweetalert';
+import './styles.scss';
 
-const columns = [
-    { id: 'code', label: 'Code', minWidth: 170 },
-    { id: 'phone', label: 'Phone', minWidth: 100 },
-    { id: 'amount', label: 'Amount', minWidth: 100 },
-    { id: 'quantity', label: 'Quantity', minWidth: 100 },
-    { id: 'status', label: 'Status', minWidth: 100 },
+import { useQuery } from "react-query";
+import { fetchTickets } from "../../query/events";
+import { Spinner } from "react-bootstrap";
+
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import TextField from '@material-ui/core/TextField';
+import Button from "@material-ui/core/Button";
+
+import MaterialTable from "material-table";
+import { useHistory } from 'react-router-dom';
+
+
+
+const EventsDetails = (props) => {
+  const {
+    match: { params },
+  } = props;
+  const history = useHistory();
+  const { status, data, refetch } = useQuery(["event.tickets", params.id], fetchTickets);
+  const [form, setForm] =useState({code:'', phone:'', price:'', quantity:''})
+
+  const [open, setOpen] = React.useState(false);
+
+  const columns = [
+    { title: "Ticket code", field: "code" },
+    { title: "Phone", field: "phone" },
+    { title: "Price", field: "price", type: "numeric" },
+    { title: "Quantity", field: "quantity", type: "numeric" },
+    { title: "Status", field: "status"},
+    { title: "Corkage", field: "corkage"},
+    { title: "Date", field: "date" },
   ];
-
-const useStyles1 = makeStyles((theme) => ({
-  root: {
-    flexShrink: 0,
-    marginLeft: theme.spacing(2.5),
-  },
-  ticketTable: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 30,
-  },
-}));
-
-function TablePaginationActions(props) {
-  const classes = useStyles1();
-  const theme = useTheme();
-  const { count, page, rowsPerPage, onChangePage } = props;
-
-  const handleFirstPageButtonClick = (event) => {
-    onChangePage(event, 0);
+  
+  const handleClickOpen = () => {
+    setOpen(true);
   };
 
-  const handleBackButtonClick = (event) => {
-    onChangePage(event, page - 1);
+  const handleClose = () => {
+    setOpen(false);
   };
 
-  const handleNextButtonClick = (event) => {
-    onChangePage(event, page + 1);
+  const createTicket = async () => {
+    const ticketdata = {
+      ...form,
+      code: form.code.toUpperCase()
+    }
+    try {
+      const res = await axios.post(`${BASE_API}/ticket/${params.id}`, ticketdata);
+      if (res.data.hasError) {
+        swal("Failed", res.data.message, "error");
+      } else {
+        swal("Success", res.data.message, "success");
+        refetch();
+        setOpen(false);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
-  const handleLastPageButtonClick = (event) => {
-    onChangePage(event, Math.max(0, Math.ceil(count / rowsPerPage) - 1));
-  };
 
-  return (
-    <div className={classes.root}>
-      <IconButton
-        onClick={handleFirstPageButtonClick}
-        disabled={page === 0}
-        aria-label="first page"
-      >
-        {theme.direction === 'rtl' ? <LastPageIcon /> : <FirstPageIcon />}
-      </IconButton>
-      <IconButton onClick={handleBackButtonClick} disabled={page === 0} aria-label="previous page">
-        {theme.direction === 'rtl' ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
-      </IconButton>
-      <IconButton
-        onClick={handleNextButtonClick}
-        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
-        aria-label="next page"
-      >
-        {theme.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
-      </IconButton>
-      <IconButton
-        onClick={handleLastPageButtonClick}
-        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
-        aria-label="last page"
-      >
-        {theme.direction === 'rtl' ? <FirstPageIcon /> : <LastPageIcon />}
-      </IconButton>
-    </div>
-  );
+if(status === 'laoding'){
+  return <Spinner />
 }
 
-TablePaginationActions.propTypes = {
-  count: PropTypes.number.isRequired,
-  onChangePage: PropTypes.func.isRequired,
-  page: PropTypes.number.isRequired,
-  rowsPerPage: PropTypes.number.isRequired,
-};
-
-const rows = [
-    { code: 'cv123456', phone: '08093702195', amount: '1000', quantity: '1', status: 'approved' },
-    { code: 'cv123456', phone: '08093702195', amount: '1000', quantity: '1', status: 'approved' },
-    { code: 'cv123456', phone: '08093702195', amount: '1000', quantity: '1', status: 'approved' },
-    { code: 'cv123456', phone: '08093702195', amount: '1000', quantity: '1', status: 'approved' },
-    { code: 'cv123456', phone: '08093702195', amount: '1000', quantity: '1', status: 'approved' },
-    { code: 'cv123456', phone: '08093702195', amount: '1000', quantity: '1', status: 'approved' },
-];
-
-const useStyles2 = makeStyles({
-  table: {
-    minWidth: 500,
-  },
-  ticketTable: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 30,
-  },
-});
-
-const EventsDetails = () => {
-  const classes = useStyles2();
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
-
-  const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
-
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
 
   return (
       <>
-      <Layout title="cruise n vibes">
-        <div className={classes.ticketTable}>
+      <Layout>
+        <div>
+        <div className=" row m-5">
+        <div className="col-md-3 mb-2">
+          <Button variant="contained" color="default" onClick={() => history.push(`/`)}>
+            Home
+          </Button>
+          </div>
 
-    <TableContainer component={Paper}>
-      <TableHead>
-      <TableRow>
-              {columns.map((column) => (
-                <TableCell
-                  key={column.id}
-                  align={column.align}
-                  style={{ minWidth: column.minWidth }}
-                >
-                  {column.label}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-      <Table className={classes.table} aria-label="custom pagination table">
-        <TableBody>
-          {(rowsPerPage > 0
-            ? rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-            : rows
-          ).map((row) => (
-            <TableRow key={row.code}>
-              <TableCell component="th" scope="row">
-                {row.code}
-              </TableCell>
-              <TableCell style={{ width: 160 }} align="right">
-                {row.phone}
-              </TableCell>
-              <TableCell style={{ width: 160 }} align="right">
-                {row.amount}
-              </TableCell>
-              <TableCell style={{ width: 160 }} align="right">
-                {row.quantity}
-              </TableCell>
-              <TableCell style={{ width: 160 }} align="right">
-                {row.status}
-              </TableCell>
-            </TableRow>
-          ))}
-
-          {emptyRows > 0 && (
-            <TableRow style={{ height: 53 * emptyRows }}>
-              <TableCell colSpan={6} />
-            </TableRow>
-          )}
-        </TableBody>
-        <TableFooter>
-          <TableRow>
-            <TablePagination
-              rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
-              colSpan={3}
-              count={rows.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              SelectProps={{
-                inputProps: { 'aria-label': 'rows per page' },
-                native: true,
-              }}
-              onChangePage={handleChangePage}
-              onChangeRowsPerPage={handleChangeRowsPerPage}
-              ActionsComponent={TablePaginationActions}
-            />
-          </TableRow>
-        </TableFooter>
-      </Table>
-    </TableContainer>
+          <div className="col-md-3 mb-2">
+          <Button variant="contained" color="primary" onClick={handleClickOpen}>
+            New ticket
+          </Button>
+          </div>
+          <div className="col-md-3">
+          <Button variant="contained" color="primary" onClick={() => history.push(`/scan`)}>
+            scan ticket
+          </Button>
+          </div>
         </div>
+        <div className="ticket-info">
+        <div style={{ maxWidth: "100%", marginTop:20 }}>
+        <MaterialTable
+          columns={columns}
+          data={data}
+          title="Tickets"
+        />
+      </div>
+        </div>
+       
+        </div>
+
+        <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
+        <DialogTitle id="form-dialog-title">Create Event</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="code"
+            label="Ticket code"
+            type="text"
+            fullWidth
+            onChange={(e) => setForm({...form, code: e.target.value})}
+          />
+          <TextField
+            margin="dense"
+            id="phone"
+            label="Customer Phone number"
+            type="text"
+            fullWidth
+            onChange={(e) => setForm({...form, phone: e.target.value})}
+          />
+           <TextField
+            
+            margin="dense"
+            id="price"
+            label="Price"
+            type="number"
+            fullWidth
+            onChange={(e) => setForm({...form, price: e.target.value})}
+          />
+          <TextField
+            margin="dense"
+            id="quantity"
+            label="Quantity"
+            type="number"
+            fullWidth
+            onChange={(e) => setForm({...form, quantity: e.target.value})}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={createTicket} color="primary">
+            Create
+          </Button>
+        </DialogActions>
+      </Dialog>
       </Layout>
       </>
   );
