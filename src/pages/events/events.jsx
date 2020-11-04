@@ -103,7 +103,7 @@ const Events = (props) => {
                   <CardContent>
                     <Typography
                       className={classes.title}
-                      color="h2"
+                      variant="h6"
                       gutterBottom
                     >
                       {item.title}
@@ -116,6 +116,7 @@ const Events = (props) => {
                   <CardActions>
                     <Button
                       size="small"
+                      variant="contained"
                       onClick={() => history.push(`/event/${item._id}`)}
                     >
                       view {item.title} tickets

@@ -19,6 +19,7 @@ import Button from "@material-ui/core/Button";
 import MaterialTable from "material-table";
 import { useHistory } from "react-router-dom";
 import QRCode from "qrcode.react";
+import dayjs from "dayjs";
 
 const EventsDetails = (props) => {
   const {
@@ -44,9 +45,12 @@ const EventsDetails = (props) => {
     { title: "Phone", field: "phone" },
     { title: "Price", field: "price", type: "numeric" },
     { title: "Quantity", field: "quantity", type: "numeric" },
-    { title: "Status", field: "status" },
-    { title: "Corkage", field: "corkage" },
-    { title: "Date", field: "date" },
+    { title: "Status", field: "status", render: ticket =>
+    <span className={ticket.status==="pending" ? "badge badge-warning" : "badge badge-success"}>{ticket.status}</span> },
+    { title: "Corkage", field: "corkage", render: ticket =>
+    <span className={ticket.corkage==="pending" ? "badge badge-warning" : "badge badge-success"}>{ticket.corkage}</span> },
+    { title: "Date", field: "date", render: ticket =>
+    dayjs(ticket.date).format('YYYY-MM-DD') },
   ];
 
   const handleClickOpen = () => {
@@ -142,6 +146,7 @@ const EventsDetails = (props) => {
                 level={"H"}
                 includeMargin={true}
               />
+              <p>{form.code.toUpperCase()}</p>
               <a
                 className="btn btn-primary"
                 href=""
@@ -154,8 +159,8 @@ const EventsDetails = (props) => {
           )}
 
           <div className="ticket-info">
-            <div style={{ maxWidth: "100%", marginTop: 20 }}>
-              <MaterialTable columns={columns} data={data} title="Tickets" />
+            <div style={{ maxWidth: "100%", marginTop: 20, padding:10 }}>
+              <MaterialTable columns={columns} data={data} title="Tickets"  />
             </div>
           </div>
         </div>

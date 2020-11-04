@@ -27,6 +27,7 @@ const Scan = (props) => {
       const res = await axios.get(`${BASE_API}/ticket/${code.toUpperCase()}`);
       if (res.data.hasError) {
         setInfo({ msg: res.data.message, err: true, succ: false });
+        setTicket({})
       } else {
         setTicket(res.data.data);
         setInfo({ msg: res.data.message, err: false, succ: true });
@@ -38,7 +39,7 @@ const Scan = (props) => {
 
   const statusTicket = async () => {
     try {
-      const res = await axios.get(`${BASE_API}/ticket/${code}/status`);
+      const res = await axios.get(`${BASE_API}/ticket/${code.toUpperCase()}/status`);
       if (res.data.hasError) {
         setInfo({ msg: res.data.message, err: true, succ: false });
       } else {
@@ -52,11 +53,12 @@ const Scan = (props) => {
 
   const corkageTicket = async () => {
     try {
-      const res = await axios.get(`${BASE_API}/ticket/${code}/corkage`);
+      const res = await axios.get(`${BASE_API}/ticket/${code.toUpperCase()}/corkage`);
       if (res.data.hasError) {
         setInfo({ msg: res.data.message, err: true, succ: false });
       } else {
         setInfo({ msg: 'Approved', err: false, succ: true });
+        getTicket();
       }
     } catch (error) {
       console.log(error);
@@ -123,10 +125,10 @@ const Scan = (props) => {
                   Quantity : {ticket?.quantity}
                 </Typography>
                 <Typography color="textSecondary">
-                  Status : {ticket?.status}
+                  Status : <span className={ticket?.status==="pending" ? "badge badge-warning" : "badge badge-success"}>{ticket?.status}</span>
                 </Typography>
                 <Typography color="textSecondary">
-                  Corkage : {ticket?.corkage}
+                  Corkage : <span className={ticket?.corkage==="pending" ? "badge badge-warning" : "badge badge-success"}>{ticket?.corkage}</span>
                 </Typography>
                 <Typography color="textSecondary">
                   Event : {ticket?.event?.title}
@@ -137,7 +139,7 @@ const Scan = (props) => {
                   size="medium"
                   variant="contained"
                   color="secondary"
-                  disabled={ticket?.status === "approved"}
+                  disabled={ticket?.status === "approved" || !ticket?.code}
                   onClick={statusTicket}
                 >
                   {ticket?.status === "approved" ? "Approved" : "Allow access"}
@@ -146,7 +148,7 @@ const Scan = (props) => {
                   size="medium"
                   variant="contained"
                   color="primary"
-                  disabled={ticket?.corkage === "approved"}
+                  disabled={ticket?.corkage === "approved" || !ticket?.code}
                   onClick={corkageTicket}
                 >
                   {ticket?.corkage === "approved"
