@@ -41,7 +41,7 @@ const EventsDetails = (props) => {
     succ: false,
   });
   const [formEdit, setFormEdit] = useState({
-    code: "",
+   // code: "",
     phone: "",
     price: "",
     quantity: "",
@@ -131,7 +131,7 @@ const EventsDetails = (props) => {
         swal("Failed", res.data.message, "error");
       } else {
         swal("Success", res.data.message, "success");
-        setFormEdit({ ...form, succ: true });
+        setFormEdit({ ...formEdit, succ: true });
         refetch();
         setOpenEdit(false);
       }
